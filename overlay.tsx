@@ -22,7 +22,7 @@ export const Overlay: React.FC = () => {
         <div id="chatlock-overlay" style={{
             position: "absolute",
             inset: -200,
-            zIndex: 2,
+            zIndex: 4,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -68,7 +68,7 @@ export const Overlay: React.FC = () => {
                     onClick={() => { const id = getCurrentId(); if (id && isLocked(id)) actUnlock(); }}>
                     Unlock Chat
                 </button>
-                <button style={{ marginTop: "4px", padding: "10px 24px", background: "var(--background-secondary)", color: "var(--text-normal)", border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 500, fontFamily: '"gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif', cursor: "pointer", transition: "background 0.15s, transform 0.1s", pointerEvents: "auto", userSelect: "none", width: "100%" }}
+                <button style={{ marginTop: "4px", padding: "10px 24px", background: "var(--background-secondary)", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 500, fontFamily: '"gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif', cursor: "pointer", transition: "background 0.15s, transform 0.1s", pointerEvents: "auto", userSelect: "none", width: "100%" }}
                     onMouseEnter={e => e.currentTarget.style.background = "var(--background-modifier-hover)"}
                     onMouseLeave={e => e.currentTarget.style.background = "var(--background-secondary)"}
                     onMouseDown={e => e.currentTarget.style.transform = "scale(0.96)"}
