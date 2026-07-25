@@ -38,11 +38,14 @@ Custom background settings
 
 [![Preview](https://your-image-url.png)](https://litter.catbox.moe/wymvfy.mp4)
 
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/62f84891-70b4-4795-8225-12ddece81224" />
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/62f84891-70b4-4795-8225-12ddece81224" />
 
 
 Idle locking
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/9e12aa22-a50a-4d24-95e0-e64acd599aae" />
+
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/9e12aa22-a50a-4d24-95e0-e64acd599aae" />
 
 
 
