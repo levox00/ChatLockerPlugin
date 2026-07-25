@@ -42,7 +42,9 @@ Custom background settings
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/62f84891-70b4-4795-8225-12ddece81224" />
 
 
-Idle locking
+
+## Idle locking
+
 
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/9e12aa22-a50a-4d24-95e0-e64acd599aae" />
