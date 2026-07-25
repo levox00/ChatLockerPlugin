@@ -1,9 +1,25 @@
 import { React, useState, useEffect, SelectedChannelStore } from "@webpack/common";
 import { getCurrentId, isLocked } from "./storage";
 import { actUnlock, actChange, actRemove } from "./modals";
+import { settings } from "./settings";
+import { getBackgroundFor } from "./background";
+
+function backgroundSizeCss(mode: string): string {
+    switch (mode) {
+        case "contain": return "contain";
+        case "stretch": return "100% 100%";
+        case "tile": return "auto";
+        case "center": return "auto";
+        case "cover":
+        default: return "cover";
+    }
+}
 
 export const Overlay: React.FC = () => {
     const [updateKey, setUpdateKey] = useState(0);
+    const { backgroundSize, enableBlur, blurStrength } = settings.use([
+        "backgroundSize", "enableBlur", "blurStrength"
+    ]);
 
     useEffect(() => {
         const handler = () => setUpdateKey(k => k + 1);
@@ -18,6 +34,33 @@ export const Overlay: React.FC = () => {
     const id = getCurrentId();
     if (!id || !isLocked(id)) return null;
 
+    const backgroundImage = getBackgroundFor(id);
+    const hasCustomBg = !!backgroundImage;
+    const blurCss = enableBlur ? `blur(${blurStrength}px)` : undefined;
+
+    // Background layer: either the user's image (blurred/sized per settings)
+    // or the default flat dark backdrop that blurs the chat behind it.
+    const backgroundLayerStyle: React.CSSProperties = hasCustomBg
+        ? {
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url("${backgroundImage}")`,
+            backgroundSize: backgroundSizeCss(backgroundSize),
+            backgroundRepeat: backgroundSize === "tile" ? "repeat" : "no-repeat",
+            backgroundPosition: "center",
+            filter: blurCss,
+            // Slightly overscale when blurring so the blur radius doesn't
+            // pull in transparent edges from outside the layer's bounds.
+            transform: enableBlur ? "scale(1.12)" : undefined,
+        }
+        : {
+            position: "absolute",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: blurCss,
+            WebkitBackdropFilter: blurCss,
+        };
+
     return (
         <div id="chatlock-overlay" style={{
             position: "absolute",
@@ -28,9 +71,7 @@ export const Overlay: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             gap: "12px",
-            background: "rgba(0, 0, 0, 0.85)",
-            backdropFilter: "blur(30px)",
-            WebkitBackdropFilter: "blur(30px)",
+            overflow: "hidden",
             borderRadius: 0,
             pointerEvents: "auto",
             color: "var(--text-normal)",
@@ -38,7 +79,17 @@ export const Overlay: React.FC = () => {
             willChange: "transform",
             boxShadow: "0 0 40px rgba(0, 0, 0, 0.6)",
         }}>
+            <div style={backgroundLayerStyle} />
+            {hasCustomBg && (
+                <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(0, 0, 0, 0.35)",
+                }} />
+            )}
             <div style={{
+                position: "relative",
+                zIndex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

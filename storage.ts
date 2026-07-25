@@ -4,6 +4,7 @@
 
 import { DataStore } from "@api/index";
 import { SelectedChannelStore } from "@webpack/common";
+import { rerollBackground } from "./background";
 
 export const DATASTORE_KEY = "ChatLockButton_data";
 export const SALT = "ChatLockButton_2025_salt";
@@ -69,7 +70,10 @@ const unlocked = new Set<string>();
 
 export const isUnlocked = (id: string) => unlocked.has(id);
 export const unlock = (id: string) => unlocked.add(id);
-export const lock = (id: string) => unlocked.delete(id);
+export const lock = (id: string) => {
+    unlocked.delete(id);
+    rerollBackground(id);
+};
 
 export const isLocked = (id: string): boolean => {
     if (!settingsLoaded) return false;

@@ -7,6 +7,8 @@ import { loadAll, lock, isLocked, hasPassword, getCurrentId } from "./storage";
 import { LockIcon, actSetLock, actUnlock, actRelock } from "./modals";
 import { Overlay } from "./overlay";
 import { refreshOverlay } from "./overlayManager";
+import { settings } from "./settings";
+import { startIdleWatcher, stopIdleWatcher } from "./idleLock";
 
 // Context menu patch
 const channelAttachPatch: NavContextMenuPatchCallback = (children, props) => {
@@ -63,6 +65,7 @@ export default definePlugin({
     description: "Adds a 'Lock Chat' item to the + dropdown. Blurs the chat when locked, auto‑locks on channel switch, and persists lock state.",
     authors: [{ name: "You", id: 0n }],
     contextMenus: { "channel-attach": channelAttachPatch },
+    settings,
 
     // Expose Overlay for the patch
     Overlay,
@@ -98,10 +101,12 @@ export default definePlugin({
     start() {
         startupLockAll();
         this._unsub = SelectedChannelStore.addChangeListener(handleChannelChange);
+        startIdleWatcher();
         refreshOverlay();
     },
 
     stop() {
         this._unsub?.();
+        stopIdleWatcher();
     }
 });
