@@ -4,7 +4,7 @@ Installing:
 
 You will need to clone equicord or vencord and build it using pnpm. Tutorials are found online or just use AI ✌️
 
-1. Go into ``C:\Users\user\Equicord\src\userplugins`` or ``C:\Users\user\Vencord\src\userplugins``
+1. Go into the folder where you cloned equicord into (__I used my user path here, I suggest doing so aswell__) ``C:\Users\user\Equicord\src\userplugins`` or ``C:\Users\user\Vencord\src\userplugins``
 - If userplugins doesnt exist create it.
 2. Open cmd and paste ````git clone https://github.com/levox00/ChatLockerPlugin````
 3. Or simply download the repo and put it into that folder.
