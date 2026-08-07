@@ -39,8 +39,6 @@ Custom background settings (GIF, videos, images)
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/59afd64a-2c7f-4c70-a267-8895674a0711" />
 
 
-[![Preview](https://your-image-url.png)](https://litter.catbox.moe/wymvfy.mp4)
-
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/62f84891-70b4-4795-8225-12ddece81224" />
 
