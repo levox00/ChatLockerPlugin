@@ -10,22 +10,34 @@ import { refreshOverlay } from "./overlayManager";
 import { settings } from "./settings";
 import { startIdleWatcher, stopIdleWatcher } from "./idleLock";
 
-// Context menu patch
+// -------------------------------------------------------------------------
+// Context Menu Patch
+// -------------------------------------------------------------------------
+
 const channelAttachPatch: NavContextMenuPatchCallback = (children, props) => {
     const channel = props?.channel;
     if (!channel) return;
+
+    // Only show in channels where we have send permission
     if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
+    
+    // Prevent duplicates
     if (children.some(child => child?.props?.id === "chatlock-button")) return;
 
     const id = getCurrentId();
     const has = id ? hasPassword(id) : false;
     const locked = id ? isLocked(id) : false;
 
-    let label = "Lock Chat";
+    let label: string;
     let icon = LockIcon;
-    if (!has) label = "Set Password";
-    else if (locked) label = "Unlock Chat";
-    else label = "Lock Chat";
+
+    if (!has) {
+        label = "Set Password";
+    } else if (locked) {
+        label = "Unlock Chat";
+    } else {
+        label = "Lock Chat";
+    }
 
     children.splice(1, 0, (
         <Menu.MenuItem
@@ -33,19 +45,27 @@ const channelAttachPatch: NavContextMenuPatchCallback = (children, props) => {
             label={label}
             iconLeft={icon}
             action={() => {
-                const id = getCurrentId();
-                if (!id) return;
-                const has = hasPassword(id);
-                if (!has) actSetLock();
-                else if (isLocked(id)) actUnlock();
-                else actRelock();
+                const currentId = getCurrentId();
+                if (!currentId) return;
+                
+                if (!hasPassword(currentId)) {
+                    actSetLock();
+                } else if (isLocked(currentId)) {
+                    actUnlock();
+                } else {
+                    actRelock();
+                }
             }}
         />
     ));
 };
 
-// Auto‑re‑lock on channel switch
+// -------------------------------------------------------------------------
+// Channel Switch Handling
+// -------------------------------------------------------------------------
+
 let previousChannelId: string | null = null;
+
 function handleChannelChange() {
     const newId = getCurrentId();
     if (previousChannelId && previousChannelId !== newId) {
@@ -56,9 +76,19 @@ function handleChannelChange() {
 }
 
 async function startupLockAll() {
-    const data = await loadAll();
-    for (const id of Object.keys(data)) lock(id);
+    try {
+        const data = await loadAll();
+        for (const id of Object.keys(data)) {
+            lock(id);
+        }
+    } catch (err) {
+        console.error("[ChatLockButton] Failed to restore locks:", err);
+    }
 }
+
+// -------------------------------------------------------------------------
+// Plugin Definition
+// -------------------------------------------------------------------------
 
 export default definePlugin({
     name: "ChatLockButton",
@@ -67,36 +97,38 @@ export default definePlugin({
     contextMenus: { "channel-attach": channelAttachPatch },
     settings,
 
-    // Expose Overlay for the patch
+    // Exposed so the patch can reference it via $self.Overlay
     Overlay,
 
     /**
-     * Verified against a live Discord build (July 2026): module 10822
-     * contains the message-list wrapper div, whose className is built from
-     * `oi.Og` (which resolves to the `messagesWrapper__...` DOM class) plus
-     * the component's `className` and `messageGroupSpacing` props (locally
-     * named `s` and `o` in that build's minified output). We inject our
-     * Overlay as the first child of that div, using the module's own local
-     * JSX runtime reference (`a`) rather than any global.
-     *
-     * NOTE: minified identifiers like `oi`, `s`, `o`, and `a` are specific
-     * to this exact Discord build and WILL change on future Discord
-     * updates, which will break this patch (Vencord will just skip it
-     * silently). If that happens: Settings -> Vencord -> Patch Helper,
-     * find "messagesNavigationDescription" (or similar unique string) to
-     * confirm the module, view its source, and re-locate the div whose
-     * className includes the messagesWrapper CSS-module class, then update
-     * the `find`/`match` below to match the new local variable names.
+     * Updated for Discord builds around August 2026.
+     * 
+     * Module 10822 still contains the message-list wrapper. The minified
+     * identifiers for the CSS-module imports and local variables shift
+     * between builds, so the regex now uses character classes instead of
+     * hard-coded names. It still anchors on the `group-spacing` template
+     * literal which has been stable.
+     * 
+     * If this breaks on a future update:
+     * 1. Settings → Vencord → Patch Helper
+     * 2. Search for "messagesNavigationDescription" (or "Inferno Spam Redaction"
+     *    / "useConversationScroll" if that string has moved)
+     * 3. Locate the wrapper div and note the local variable names for:
+     *    - the clsx-like utility (usually `c` or `C`)
+     *    - the JSX runtime (usually `a` or `n(477900)`)
+     * 4. Update the `match` and `replace` below accordingly.
      */
     patches: [
         {
             find: "messagesNavigationDescription",
             replacement: {
-                match: /className:c\(\)\(oi\.Og,s,`group-spacing-\$\{o\}`\),children:\[/,
+                match: /className:c\(\)\([a-zA-Z_$][\w$]*\.[a-zA-Z_$][\w$]*,[a-zA-Z_$][\w$]*,`group-spacing-\$\{[a-zA-Z_$][\w$]*\}`\),children:\[/,
                 replace: (match: string) => `${match}a.jsx($self.Overlay,{}),`
             }
         }
     ],
+
+    _unsub: null as (() => void) | null,
 
     start() {
         startupLockAll();
@@ -107,6 +139,7 @@ export default definePlugin({
 
     stop() {
         this._unsub?.();
+        this._unsub = null;
         stopIdleWatcher();
     }
 });
