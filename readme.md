@@ -12,6 +12,11 @@ You will need to clone equicord or vencord and build it using pnpm. Tutorials ar
 # Setting a password.
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/30d2f066-0717-4b60-9fa9-d22b3b217b08" />
 
+# Getting started (self explanatory or use AI 😭) :
+
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/43fe7046-8e4b-49e0-a880-643d1d229429" />
+
 
 Changing & Removing passwords.
 
